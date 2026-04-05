@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Personal portfolio website for Petr Šmerda, focused on AI/ML, quantum computing, and quantitative finance."
+    />
+    <title>Petr Šmerda | Portfolio</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="focus-scenes.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="container">
+          <nav class="navbar" aria-label="Primary">
+            <a class="brand" href="#focus/ml" data-view-link="focus">
+              <span class="brand-title">Petr Šmerda</span>
+              <span class="brand-sub">Personal website across AI, quant, and quantum</span>
+            </a>
+
+            <button
+              class="nav-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="site-menu"
+              aria-label="Toggle navigation"
+            >
+              <span></span>
+              <span></span>
+            </button>
+
+            <div class="nav-menu" id="site-menu">
+              <a href="#focus/ml" data-view-link="focus">Focus</a>
+              <a href="#about" data-view-link="about">About</a>
+              <a href="#skills" data-view-link="skills">Skills</a>
+              <a href="#contacts" data-view-link="contacts">Contacts</a>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <main class="view-shell">
+        <section class="view view-focus is-active" id="focus" data-view="focus">
+          <div class="focus-tabs-wrap">
+            <div class="container">
+              <div
+                class="focus-tabs"
+                role="tablist"
+                aria-label="Focus disciplines"
+              >
+                <button
+                  class="focus-tab is-active"
+                  type="button"
+                  role="tab"
+                  id="focus-tab-ml"
+                  aria-selected="true"
+                  aria-controls="focus-panel-ml"
+                  data-focus-tab="ml"
+                  aria-label="Machine Learning"
+                >
+                  Machine Learning
+                </button>
+                <button
+                  class="focus-tab"
+                  type="button"
+                  role="tab"
+                  id="focus-tab-quant"
+                  aria-selected="false"
+                  aria-controls="focus-panel-quant"
+                  data-focus-tab="quant"
+                  aria-label="Quant Finance"
+                >
+                  Quant Finance
+                </button>
+                <button
+                  class="focus-tab"
+                  type="button"
+                  role="tab"
+                  id="focus-tab-quantum"
+                  aria-selected="false"
+                  aria-controls="focus-panel-quantum"
+                  data-focus-tab="quantum"
+                  aria-label="Quantum Computing"
+                >
+                  Quantum Computing
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="focus-stage">
+            <article
+              class="focus-scene focus-scene-ml is-active"
+              id="focus-panel-ml"
+              data-focus-panel="ml"
+              role="tabpanel"
+              aria-labelledby="focus-tab-ml"
+            >
+              <canvas
+                class="scene-canvas"
+                id="focus-canvas-ml"
+                aria-hidden="true"
+              ></canvas>
+
+              <div class="scene-overlay">
+                <div class="scene-top">
+                  <div class="scene-tag">AI / ML</div>
+                  <h1 class="scene-title">Applied Machine Learning</h1>
+                  <p class="scene-desc">
+                    Building practical workflows around data preparation, rapid
+                    experimentation, model evaluation, and production-minded
+                    delivery.
+                  </p>
+                </div>
+
+                <div class="scene-bottom">
+                  <div class="pill-row">
+                    <span class="pill">PyTorch workflows</span>
+                    <span class="pill">data pipelines</span>
+                    <span class="pill">iterative experiments</span>
+                  </div>
+                  <div class="hint">
+                    Move your cursor to excite nearby neurons. Click a node to
+                    trigger an activation burst through the network.
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="focus-scene focus-scene-quant"
+              id="focus-panel-quant"
+              data-focus-panel="quant"
+              role="tabpanel"
+              aria-labelledby="focus-tab-quant"
+              hidden
+            >
+              <canvas
+                class="scene-canvas"
+                id="focus-canvas-quant"
+                aria-hidden="true"
+              ></canvas>
+
+              <div class="scene-overlay">
+                <div class="scene-top">
+                  <div class="scene-tag">Quant Finance</div>
+                  <h1 class="scene-title">Quantitative Finance Research</h1>
+                  <p class="scene-desc">
+                    Exploring market behavior, signal design, and structured
+                    decision-making through synthetic price action and
+                    market-facing analysis.
+                  </p>
+                </div>
+
+                <div class="scene-bottom">
+                  <div class="pill-row">
+                    <span class="pill">signal research</span>
+                    <span class="pill">market structure</span>
+                    <span class="pill">backtesting logic</span>
+                  </div>
+                  <div class="hint">
+                    Hover a candle to highlight its full column and inspect
+                    OHLC plus daily return.
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="focus-scene focus-scene-quantum"
+              id="focus-panel-quantum"
+              data-focus-panel="quantum"
+              role="tabpanel"
+              aria-labelledby="focus-tab-quantum"
+              hidden
+            >
+              <canvas
+                class="scene-canvas"
+                id="focus-canvas-quantum"
+                aria-hidden="true"
+              ></canvas>
+
+              <div class="scene-overlay">
+                <div class="scene-top">
+                  <div class="scene-tag">Quantum Computing</div>
+                  <h1 class="scene-title">Quantum Computing and Algorithms</h1>
+                  <p class="scene-desc">
+                    Following hybrid models, algorithmic ideas, and the
+                    practical potential of quantum systems with a strong focus
+                    on emerging applications.
+                  </p>
+                </div>
+
+                <div class="scene-bottom">
+                  <div class="pill-row">
+                    <span class="pill">quantum algorithms</span>
+                    <span class="pill">hybrid systems</span>
+                    <span class="pill">applied curiosity</span>
+                  </div>
+                  <div class="hint">
+                    Move across the field to bend links. Click to trigger a
+                    quantum excitation burst.
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="about" data-view="about" hidden>
+          <div class="container view-body">
+            <div class="view-intro">
+              <p class="view-label">About</p>
+              <h2 class="view-title">Curious by default, technical by practice.</h2>
+              <p class="view-lead">
+                I work with an implementation-first mindset across AI/ML, with
+                strong interest in quantum computing and quantitative finance.
+              </p>
+            </div>
+
+            <div class="about-layout">
+              <div class="surface about-copy">
+                <p>
+                  My work is driven by structured problem solving, algorithmic
+                  thinking, and a preference for turning hard ideas into clear
+                  systems.
+                </p>
+                <p>
+                  I care about technical rigor, practical output, and the habit
+                  of iterating until the implementation actually holds up.
+                </p>
+
+                <div class="view-actions">
+                  <a class="button button-primary" href="files/CV.pdf" download>
+                    Download CV
+                  </a>
+                  <a
+                    class="button button-secondary"
+                    href="https://github.com/smerdikus"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    GitHub
+                  </a>
+                  <a
+                    class="button button-secondary"
+                    href="https://www.linkedin.com/in/petr-%C5%A1merda-549807317/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+
+              <div class="about-highlights">
+                <article class="surface detail-tile">
+                  <span class="detail-label">Approach</span>
+                  <strong>Analytical and implementation-focused</strong>
+                </article>
+                <article class="surface detail-tile">
+                  <span class="detail-label">Interests</span>
+                  <strong>AI/ML, quantum computing, trading systems</strong>
+                </article>
+                <article class="surface detail-tile">
+                  <span class="detail-label">Mindset</span>
+                  <strong>Build clearly, iterate quickly, improve constantly</strong>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="skills" data-view="skills" hidden>
+          <div class="container view-body">
+            <div class="view-intro">
+              <p class="view-label">Skills</p>
+              <h2 class="view-title">
+                Technical strengths across software, data, and research.
+              </h2>
+            </div>
+
+            <div class="skills-layout">
+              <article class="surface skill-panel">
+                <h3>Programming Languages</h3>
+                <div class="chip-row">
+                  <span class="chip">C++</span>
+                  <span class="chip">Python</span>
+                  <span class="chip">Julia</span>
+                  <span class="chip">PHP</span>
+                  <span class="chip">SQL</span>
+                  <span class="chip">JavaScript</span>
+                </div>
+              </article>
+
+              <article class="surface skill-panel">
+                <h3>Python / Data Science</h3>
+                <div class="chip-row">
+                  <span class="chip chip-blue">pandas</span>
+                  <span class="chip chip-blue">NumPy</span>
+                  <span class="chip chip-blue">scikit-learn</span>
+                  <span class="chip chip-blue">PyTorch</span>
+                  <span class="chip chip-blue">Jupyter</span>
+                </div>
+              </article>
+
+              <article class="surface skill-panel">
+                <h3>Creative Coding / Graphics</h3>
+                <div class="chip-row">
+                  <span class="chip chip-violet">p5.js</span>
+                  <span class="chip chip-violet">SFML</span>
+                </div>
+              </article>
+
+              <article class="surface skill-panel">
+                <h3>Tools / Platforms</h3>
+                <div class="chip-row">
+                  <span class="chip chip-green">Unix</span>
+                  <span class="chip chip-green">Git</span>
+                  <span class="chip chip-green">AWS</span>
+                  <span class="chip chip-green">LaTeX</span>
+                </div>
+              </article>
+
+              <article class="surface skill-panel skill-panel-wide">
+                <h3>Other Skills</h3>
+                <div class="chip-row">
+                  <span class="chip">Machine learning</span>
+                  <span class="chip">Data analysis</span>
+                  <span class="chip">Algorithm design</span>
+                  <span class="chip">Problem solving</span>
+                  <span class="chip">Cloud deployment</span>
+                  <span class="chip">Quantum computing</span>
+                  <span class="chip">Quantum algorithms</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="contacts" data-view="contacts" hidden>
+          <div class="container view-body">
+            <div class="view-intro">
+              <p class="view-label">Contacts</p>
+              <h2 class="view-title">Direct ways to reach me.</h2>
+            </div>
+
+            <div class="contact-layout">
+              <a class="surface contact-card" href="mailto:smerdikus@gmail.com">
+                <span class="detail-label">Email</span>
+                <strong>smerdikus@gmail.com</strong>
+              </a>
+
+              <a
+                class="surface contact-card"
+                href="https://github.com/smerdikus"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span class="detail-label">GitHub</span>
+                <strong>github.com/smerdikus</strong>
+              </a>
+
+              <a
+                class="surface contact-card"
+                href="https://www.linkedin.com/in/petr-%C5%A1merda-549807317/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span class="detail-label">LinkedIn</span>
+                <strong>Petr Šmerda</strong>
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

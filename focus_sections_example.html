@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI / Quant / Quantum Experience</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --bg: #050816;
+      --text: rgba(245, 248, 255, 0.96);
+      --muted: rgba(212, 220, 235, 0.68);
+      --border: rgba(150, 180, 255, 0.14);
+      --glass: rgba(8, 12, 24, 0.58);
+      --glass-strong: rgba(8, 12, 24, 0.82);
+      --shadow: 0 20px 80px rgba(0, 0, 0, 0.38);
+      --ai: #3B82F6;
+      --quant: #10B981;
+      --qc: #8B5CF6;
+      --accent: #78cfff;
+      --accent-2: #9b7dff;
+      --accent-3: #27d3b8;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(48, 87, 152, 0.18), transparent 0 28%),
+        radial-gradient(circle at 85% 10%, rgba(110, 61, 189, 0.14), transparent 0 24%),
+        radial-gradient(circle at 75% 80%, rgba(23, 168, 142, 0.12), transparent 0 26%),
+        linear-gradient(180deg, #050816 0%, #070d1c 52%, #08101f 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,0.02), transparent 18%),
+        radial-gradient(circle at center, transparent 0%, rgba(5, 8, 22, 0.18) 68%, rgba(5, 8, 22, 0.42) 100%);
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 28px 10px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .nav-wrap {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      padding: 4px 28px 0;
+    }
+
+    .nav {
+      display: flex;
+      align-items: end;
+      justify-content: center;
+      gap: clamp(18px, 4vw, 56px);
+      width: 100%;
+      padding: 0 8px 14px;
+      border-bottom: 1px solid rgba(160, 185, 255, 0.12);
+    }
+
+    .tab {
+      position: relative;
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: rgba(230, 236, 248, 0.62);
+      font: inherit;
+      font-size: clamp(1rem, 1.7vw, 1.28rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      padding: 8px 0 14px;
+      cursor: pointer;
+      transition: color 180ms ease, transform 180ms ease, opacity 180ms ease;
+    }
+
+    .tab:hover {
+      color: rgba(244, 247, 255, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .tab.active {
+      color: rgba(247, 250, 255, 0.98);
+      transform: scale(1.14);
+    }
+
+    .tab::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+      opacity: 0;
+      transform: scaleX(0.35);
+      transform-origin: center;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .tab.active::after {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    .stage {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .scene-panel {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 340ms ease;
+      overflow: hidden;
+    }
+
+    .scene-panel::before {
+      content: "";
+      position: absolute;
+      inset: -12%;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(18px);
+      opacity: 1;
+    }
+
+    .scene-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    #scene-ai {
+      background:
+        linear-gradient(180deg, rgba(6, 10, 24, 0.98), rgba(5, 9, 22, 0.98));
+    }
+
+    #scene-ai::before {
+      background:
+        radial-gradient(circle at 88% 10%, rgba(59, 130, 246, 0.42), transparent 0 34%),
+        radial-gradient(circle at 12% 88%, rgba(34, 211, 238, 0.28), transparent 0 30%);
+    }
+
+    #scene-ai::after {
+      background:
+        linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent 40%),
+        linear-gradient(315deg, rgba(34, 211, 238, 0.08), transparent 36%);
+    }
+
+    #scene-quant {
+      background:
+        linear-gradient(180deg, rgba(5, 12, 14, 0.985), rgba(5, 10, 12, 0.99));
+    }
+
+    #scene-quant::before {
+      background:
+        radial-gradient(circle at 86% 14%, rgba(16, 185, 129, 0.38), transparent 0 34%),
+        radial-gradient(circle at 14% 86%, rgba(45, 212, 191, 0.24), transparent 0 30%);
+    }
+
+    #scene-quant::after {
+      background:
+        linear-gradient(145deg, rgba(16, 185, 129, 0.09), transparent 40%),
+        linear-gradient(320deg, rgba(45, 212, 191, 0.07), transparent 36%);
+    }
+
+    #scene-qc {
+      background:
+        linear-gradient(180deg, rgba(9, 7, 24, 0.985), rgba(7, 6, 20, 0.99));
+    }
+
+    #scene-qc::before {
+      background:
+        radial-gradient(circle at 88% 12%, rgba(139, 92, 246, 0.42), transparent 0 34%),
+        radial-gradient(circle at 12% 88%, rgba(217, 70, 239, 0.28), transparent 0 30%);
+    }
+
+    #scene-qc::after {
+      background:
+        linear-gradient(140deg, rgba(139, 92, 246, 0.1), transparent 40%),
+        linear-gradient(320deg, rgba(217, 70, 239, 0.08), transparent 36%);
+    }
+
+    .scene-panel.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    canvas.scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      background: transparent;
+    }
+
+    .scene-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 34px 34px 30px;
+      pointer-events: none;
+    }
+
+    .scene-top,
+    .scene-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: min(760px, 72vw);
+    }
+
+    .tag {
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(190, 210, 255, 0.14);
+      color: rgba(234, 240, 252, 0.82);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .scene-title {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 5rem);
+      line-height: 0.96;
+      letter-spacing: -0.045em;
+      max-width: 11ch;
+    }
+
+    .scene-desc {
+      margin: 0;
+      font-size: clamp(1rem, 1.5vw, 1.14rem);
+      line-height: 1.72;
+      color: var(--muted);
+      max-width: 50ch;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(175, 200, 255, 0.1);
+      color: rgba(231, 237, 248, 0.72);
+      font-size: 0.82rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .hint {
+      width: fit-content;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(10, 16, 30, 0.52);
+      border: 1px solid rgba(180, 205, 255, 0.11);
+      color: rgba(230, 236, 246, 0.66);
+      font-size: 0.84rem;
+      backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 820px) {
+      .topbar {
+        padding: 16px 16px 8px;
+      }
+
+      .nav-wrap {
+        padding: 4px 16px 0;
+      }
+
+      .nav {
+        gap: 16px;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        white-space: nowrap;
+      }
+
+      .scene-overlay {
+        padding: 24px 16px 20px;
+      }
+
+      .scene-top,
+      .scene-bottom {
+        max-width: 100%;
+      }
+
+      .scene-title {
+        max-width: 12ch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">Technical Domains</div>
+        <div class="brand-sub">Interactive fullscreen visual modes</div>
+      </div>
+    </header>
+
+    <div class="nav-wrap">
+      <nav class="nav" aria-label="Visualization modes">
+        <button class="tab active" data-target="ai">AI/ML</button>
+        <button class="tab" data-target="quant">Quant Finance</button>
+        <button class="tab" data-target="qc">Quantum Computing</button>
+      </nav>
+    </div>
+
+    <section class="stage">
+      <section class="scene-panel active" id="scene-ai">
+        <canvas id="canvas-ai" class="scene"></canvas>
+        <div class="scene-overlay">
+          <div class="scene-top">
+            <div class="tag">AI / ML</div>
+            <h1 class="scene-title">Neural Network Dynamics</h1>
+            <p class="scene-desc">A fullscreen neural field with layered structure, activation flow, and local interaction around the cursor.</p>
+          </div>
+          <div class="scene-bottom">
+            <div class="pill-row">
+              <span class="pill">neurons</span>
+              <span class="pill">weights</span>
+              <span class="pill">activation flow</span>
+            </div>
+            <div class="hint">Move your cursor to excite nearby neurons. Click a neuron to propagate a burst through its children.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene-panel" id="scene-quant">
+        <canvas id="canvas-quant" class="scene"></canvas>
+        <div class="scene-overlay">
+          <div class="scene-top">
+            <div class="tag">Quant Finance</div>
+            <h1 class="scene-title">Candlestick Market View</h1>
+            <p class="scene-desc">A cleaner chart with stronger hover focus and more realistic synthetic candles generated from a market-like return process.</p>
+          </div>
+          <div class="scene-bottom">
+            <div class="pill-row">
+              <span class="pill">candlesticks</span>
+              <span class="pill">market structure</span>
+              <span class="pill">price action</span>
+            </div>
+            <div class="hint">Hover a candle to highlight its full column and inspect OHLC plus daily return.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene-panel" id="scene-qc">
+        <canvas id="canvas-qc" class="scene"></canvas>
+        <div class="scene-overlay">
+          <div class="scene-top">
+            <div class="tag">Quantum Computing</div>
+            <h1 class="scene-title">Quantum State Space</h1>
+            <p class="scene-desc">Bloch-inspired qubits, orbital motion, entanglement links, and a stronger interactive field that bends and brightens the system.</p>
+          </div>
+          <div class="scene-bottom">
+            <div class="pill-row">
+              <span class="pill">bloch spheres</span>
+              <span class="pill">entanglement</span>
+              <span class="pill">wave field</span>
+            </div>
+            <div class="hint">Move across the field to bend links. Click to trigger a quantum excitation burst.</div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    class PanelPointer {
+      constructor(element) {
+        this.element = element;
+        this.x = 0.5;
+        this.y = 0.5;
+        this.active = false;
+        this.clickX = 0.5;
+        this.clickY = 0.5;
+        this.clickHandlers = [];
+
+        element.addEventListener('mousemove', (e) => {
+          const rect = element.getBoundingClientRect();
+          this.x = (e.clientX - rect.left) / rect.width;
+          this.y = (e.clientY - rect.top) / rect.height;
+          this.active = true;
+        });
+
+        element.addEventListener('mouseleave', () => {
+          this.active = false;
+        });
+
+        element.addEventListener('touchmove', (e) => {
+          if (!e.touches.length) return;
+          const rect = element.getBoundingClientRect();
+          this.x = (e.touches[0].clientX - rect.left) / rect.width;
+          this.y = (e.touches[0].clientY - rect.top) / rect.height;
+          this.active = true;
+        }, { passive: true });
+
+        element.addEventListener('touchend', () => {
+          this.active = false;
+        });
+
+        element.addEventListener('click', (e) => {
+          const rect = element.getBoundingClientRect();
+          this.clickX = (e.clientX - rect.left) / rect.width;
+          this.clickY = (e.clientY - rect.top) / rect.height;
+          for (const handler of this.clickHandlers) handler(this.clickX, this.clickY);
+        });
+      }
+
+      onClick(handler) {
+        this.clickHandlers.push(handler);
+      }
+    }
+
+    class BaseScene {
+      constructor(canvas, panel) {
+        this.canvas = canvas;
+        this.panel = panel;
+        this.ctx = canvas.getContext('2d');
+        this.pointer = new PanelPointer(panel);
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.w = 0;
+        this.h = 0;
+        this.resize();
+      }
+
+      resize() {
+        const rect = this.panel.getBoundingClientRect();
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.w = Math.max(10, Math.floor(rect.width));
+        this.h = Math.max(10, Math.floor(rect.height));
+        this.canvas.width = Math.floor(this.w * this.dpr);
+        this.canvas.height = Math.floor(this.h * this.dpr);
+        this.canvas.style.width = this.w + 'px';
+        this.canvas.style.height = this.h + 'px';
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        if (this.initScene) this.initScene();
+      }
+    }
+
+    class AIScene extends BaseScene {
+      initScene() {
+        this.nodes = [];
+        this.edges = [];
+        this.pulses = [];
+        this.shocks = [];
+
+        const nodeCounts = this.w < 640 ? [4, 6, 7, 6, 4] : [6, 9, 12, 9, 6];
+        const marginX = this.w * 0.12;
+        const marginY = this.h * 0.18;
+        const usableW = this.w - marginX * 2;
+        const usableH = this.h - marginY * 2;
+
+        for (let layer = 0; layer < nodeCounts.length; layer++) {
+          const count = nodeCounts[layer];
+          const x = marginX + (usableW * layer) / (nodeCounts.length - 1);
+          for (let i = 0; i < count; i++) {
+            this.nodes.push({
+              id: `${layer}-${i}`,
+              layer,
+              x,
+              y: marginY + (usableH * (i + 1)) / (count + 1),
+              r: 4 + Math.random() * 5,
+              bias: Math.random() * Math.PI * 2,
+              speed: 0.5 + Math.random() * 1.2,
+              shock: 0,
+            });
+          }
+        }
+
+        for (const a of this.nodes) {
+          for (const b of this.nodes) {
+            if (b.layer === a.layer + 1) {
+              this.edges.push({ a, b, weight: 0.3 + Math.random() * 0.7, phase: Math.random() * Math.PI * 2 });
+            }
+          }
+        }
+
+        this.pointer.clickHandlers = [];
+        this.pointer.onClick((x, y) => this.handleClick(x * this.w, y * this.h));
+        this.pulseClock = 0;
+      }
+
+      handleClick(px, py) {
+        let best = null;
+        let bestD = Infinity;
+        for (const node of this.nodes) {
+          const d = Math.hypot(node.x - px, node.y - py);
+          if (d < bestD) {
+            bestD = d;
+            best = node;
+          }
+        }
+        if (!best || bestD > 40) return;
+
+        this.shocks.push({ x: best.x, y: best.y, life: 1 });
+        best.shock = 1;
+
+        const outgoing = this.edges.filter((e) => e.a === best);
+        for (const edge of outgoing) {
+          this.pulses.push({ edge, p: 0, speed: 0.02, burst: true });
+          edge.b.shock = Math.max(edge.b.shock, 0.85);
+          this.shocks.push({ x: edge.b.x, y: edge.b.y, life: 0.9 });
+        }
+      }
+
+      updatePulses() {
+        this.pulseClock += 1;
+        if (this.pulseClock % 8 === 0 && this.edges.length) {
+          const edge = this.edges[Math.floor(Math.random() * this.edges.length)];
+          this.pulses.push({ edge, p: 0, speed: 0.007 + Math.random() * 0.014, burst: false });
+        }
+
+        this.pulses = this.pulses.filter((pulse) => {
+          pulse.p += pulse.speed;
+          return pulse.p <= 1.05;
+        });
+
+        this.shocks = this.shocks.filter((s) => {
+          s.life -= 0.025;
+          return s.life > 0;
+        });
+
+        for (const node of this.nodes) node.shock *= 0.95;
+      }
+
+      render(t) {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.w, this.h);
+
+        const grad = ctx.createRadialGradient(this.w * 0.2, this.h * 0.18, 10, this.w * 0.2, this.h * 0.18, this.w * 0.95);
+        grad.addColorStop(0, 'rgba(59, 130, 246, 0.14)');
+        grad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, this.w, this.h);
+
+        this.updatePulses();
+
+        for (const edge of this.edges) {
+          const mx = this.pointer.active ? this.pointer.x * this.w : this.w * 0.5;
+          const my = this.pointer.active ? this.pointer.y * this.h : this.h * 0.5;
+          const cx = (edge.a.x + edge.b.x) * 0.5;
+          const cy = (edge.a.y + edge.b.y) * 0.5;
+          const d = Math.hypot(cx - mx, cy - my);
+          const hoverBoost = this.pointer.active ? Math.max(0, 1 - d / 220) : 0;
+          const edgeShock = Math.max(edge.a.shock, edge.b.shock);
+          const alpha = 0.05 + edge.weight * 0.06 + hoverBoost * 0.16 + edgeShock * 0.18;
+          const bend = Math.sin(t * 1.1 + edge.phase) * 10 + hoverBoost * 22;
+
+          ctx.beginPath();
+          ctx.moveTo(edge.a.x, edge.a.y);
+          ctx.quadraticCurveTo(cx, cy - bend, edge.b.x, edge.b.y);
+          ctx.strokeStyle = `rgba(59, 130, 246, ${alpha})`;
+          ctx.lineWidth = 1 + edge.weight * 0.6 + hoverBoost * 0.9 + edgeShock * 0.8;
+          ctx.stroke();
+        }
+
+        for (const pulse of this.pulses) {
+          const { a, b } = pulse.edge;
+          const cx = (a.x + b.x) * 0.5;
+          const cy = (a.y + b.y) * 0.5 - Math.sin(t * 1.1 + pulse.edge.phase) * 10;
+          const p = pulse.p;
+          const x = (1 - p) * (1 - p) * a.x + 2 * (1 - p) * p * cx + p * p * b.x;
+          const y = (1 - p) * (1 - p) * a.y + 2 * (1 - p) * p * cy + p * p * b.y;
+          const glow = ctx.createRadialGradient(x, y, 0, x, y, pulse.burst ? 24 : 20);
+          glow.addColorStop(0, 'rgba(255,255,255,0.98)');
+          glow.addColorStop(0.35, 'rgba(59, 130, 246, 0.92)');
+          glow.addColorStop(1, 'rgba(59, 130, 246, 0)');
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(x, y, pulse.burst ? 10 : 8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        for (const shock of this.shocks) {
+          ctx.strokeStyle = `rgba(59, 130, 246, ${shock.life * 0.35})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(shock.x, shock.y, (1 - shock.life) * 30 + 10, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        for (const node of this.nodes) {
+          const mx = this.pointer.active ? this.pointer.x * this.w : this.w * 0.5;
+          const my = this.pointer.active ? this.pointer.y * this.h : this.h * 0.5;
+          const d = Math.hypot(node.x - mx, node.y - my);
+          const hoverBoost = this.pointer.active ? Math.max(0, 1 - d / 210) : 0;
+          const activity = 0.5 + 0.5 * Math.sin(t * node.speed + node.bias) + hoverBoost * 1.3 + node.shock * 1.1;
+          const r = node.r + activity * 2.8;
+
+          const halo = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r * 5);
+          halo.addColorStop(0, `rgba(59, 130, 246, ${0.18 + hoverBoost * 0.26 + node.shock * 0.28})`);
+          halo.addColorStop(1, 'rgba(59, 130, 246, 0)');
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, r * 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = `rgba(210, 232, 255, ${0.72 + Math.min(activity * 0.2, 0.24)})`;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    class QuantScene extends BaseScene {
+      initScene() {
+        this.candles = [];
+        this.gridLines = 5;
+        this.seed = Math.random() * 1000;
+        this.rebuildSeries();
+      }
+
+      rebuildSeries() {
+        this.candles = [];
+        const count = Math.max(34, Math.min(72, Math.floor(this.w / 24)));
+
+        // Hardcoded, market-like daily return model inspired by broad equity index behavior:
+        // small positive drift, mostly modest moves, occasional larger shocks, and mild volatility clustering.
+        const baseDrift = 0.00035;
+        const lowVol = 0.0065;
+        const highVol = 0.015;
+        const shockVol = 0.028;
+
+        let price = 100;
+        let volRegime = lowVol;
+
+        const randn = () => {
+          let u = 0;
+          let v = 0;
+          while (u === 0) u = Math.random();
+          while (v === 0) v = Math.random();
+          return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+        };
+
+        for (let i = 0; i < count; i++) {
+          const regimeRoll = Math.random();
+          if (regimeRoll < 0.08) volRegime = highVol;
+          else if (regimeRoll < 0.11) volRegime = shockVol;
+          else volRegime = 0.84 * volRegime + 0.16 * lowVol;
+
+          const overnightGap = randn() * volRegime * 0.35;
+          const open = price * (1 + overnightGap);
+
+          const intradayReturn = baseDrift + randn() * volRegime;
+          const close = open * (1 + intradayReturn);
+
+          const bodyMove = Math.abs(close - open) / Math.max(open, 1e-9);
+          const upperWickFrac = Math.abs(randn()) * volRegime * (0.45 + Math.random() * 0.55) + bodyMove * 0.35;
+          const lowerWickFrac = Math.abs(randn()) * volRegime * (0.45 + Math.random() * 0.55) + bodyMove * 0.35;
+
+          const high = Math.max(open, close) * (1 + upperWickFrac);
+          const low = Math.min(open, close) * Math.max(0.001, 1 - lowerWickFrac);
+
+          this.candles.push({ open, high, low, close });
+          price = close;
+        }
+      }
+
+      render() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.w, this.h);
+
+        ctx.fillStyle = 'rgba(6, 10, 14, 0.82)';
+        ctx.fillRect(0, 0, this.w, this.h);
+
+        const padLeft = 90;
+        const padRight = 40;
+        const padTop = 120;
+        const padBottom = 72;
+        const chartX = padLeft;
+        const chartY = padTop;
+        const chartW = Math.max(120, this.w - padLeft - padRight);
+        const chartH = Math.max(120, this.h - padTop - padBottom);
+
+        const prices = this.candles.flatMap(c => [c.open, c.high, c.low, c.close]);
+        const rawMin = Math.min(...prices);
+        const rawMax = Math.max(...prices);
+        const range = Math.max(1, rawMax - rawMin);
+        const minP = rawMin - range * 0.08;
+        const maxP = rawMax + range * 0.08;
+        const priceToY = (price) => chartY + chartH - ((price - minP) / (maxP - minP)) * chartH;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.012)';
+        ctx.fillRect(chartX, chartY, chartW, chartH);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(chartX, chartY, chartW, chartH);
+
+        for (let i = 0; i < this.gridLines; i++) {
+          const y = chartY + (chartH * i) / (this.gridLines - 1);
+          ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+          ctx.beginPath();
+          ctx.moveTo(chartX, y);
+          ctx.lineTo(chartX + chartW, y);
+          ctx.stroke();
+
+          const labelPrice = maxP - ((maxP - minP) * i) / (this.gridLines - 1);
+          ctx.fillStyle = 'rgba(210, 220, 230, 0.55)';
+          ctx.font = '12px Inter, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(labelPrice.toFixed(1), chartX - 10, y + 4);
+        }
+
+        const candleStep = chartW / this.candles.length;
+        const candleWidth = Math.max(6, Math.min(14, candleStep * 0.58));
+        let hovered = -1;
+        const mx = this.pointer.active ? this.pointer.x * this.w : -1;
+        const my = this.pointer.active ? this.pointer.y * this.h : -1;
+
+        if (this.pointer.active && mx >= chartX && mx <= chartX + chartW && my >= chartY && my <= chartY + chartH) {
+          hovered = Math.max(0, Math.min(this.candles.length - 1, Math.floor((mx - chartX) / candleStep)));
+        }
+
+        for (let i = 0; i < this.candles.length; i++) {
+          const candle = this.candles[i];
+          const x = chartX + i * candleStep + candleStep * 0.5;
+          const yOpen = priceToY(candle.open);
+          const yClose = priceToY(candle.close);
+          const yHigh = priceToY(candle.high);
+          const yLow = priceToY(candle.low);
+          const bullish = candle.close >= candle.open;
+          const bodyTop = Math.min(yOpen, yClose);
+          const bodyBottom = Math.max(yOpen, yClose);
+          const bodyHeight = Math.max(4, bodyBottom - bodyTop);
+          const isHovered = i === hovered;
+
+          if (isHovered) {
+            ctx.fillStyle = 'rgba(255,255,255,0.075)';
+            ctx.fillRect(x - candleStep * 0.7, chartY, candleStep * 1.4, chartH);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 1.2;
+            ctx.strokeRect(x - candleStep * 0.7, chartY, candleStep * 1.4, chartH);
+          }
+
+          ctx.strokeStyle = bullish ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)';
+          ctx.lineWidth = isHovered ? 2.8 : 1.3;
+          ctx.beginPath();
+          ctx.moveTo(x, yHigh);
+          ctx.lineTo(x, yLow);
+          ctx.stroke();
+
+          ctx.fillStyle = bullish ? 'rgba(16,185,129,0.32)' : 'rgba(239,68,68,0.32)';
+          ctx.strokeStyle = bullish ? 'rgba(16,185,129,1)' : 'rgba(239,68,68,1)';
+          ctx.lineWidth = isHovered ? 2.2 : 1.3;
+          ctx.beginPath();
+          ctx.rect(x - candleWidth * 0.5, bodyTop, candleWidth, bodyHeight);
+          ctx.fill();
+          ctx.stroke();
+
+          if (isHovered) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(x - candleWidth * 0.5 - 3, bodyTop - 3, candleWidth + 6, bodyHeight + 6);
+          }
+        }
+
+        const last = this.candles[this.candles.length - 1];
+        const lastY = priceToY(last.close);
+        const lastBull = last.close >= last.open;
+        ctx.strokeStyle = lastBull ? 'rgba(16,185,129,0.32)' : 'rgba(239,68,68,0.32)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(chartX, lastY);
+        ctx.lineTo(chartX + chartW, lastY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (hovered >= 0) {
+          const candle = this.candles[hovered];
+          const x = chartX + hovered * candleStep + candleStep * 0.5;
+          const yMid = priceToY((candle.high + candle.low) * 0.5);
+
+          ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+          ctx.setLineDash([5, 7]);
+          ctx.beginPath();
+          ctx.moveTo(x, chartY);
+          ctx.lineTo(x, chartY + chartH);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          const boxW = 166;
+          const boxH = 88;
+          let boxX = x + 18;
+          let boxY = yMid - boxH * 0.5;
+          if (boxX + boxW > chartX + chartW) boxX = x - boxW - 18;
+          boxY = Math.max(chartY + 8, Math.min(chartY + chartH - boxH - 8, boxY));
+
+          ctx.fillStyle = 'rgba(8, 12, 16, 0.96)';
+          ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+          ctx.beginPath();
+          ctx.roundRect(boxX, boxY, boxW, boxH, 12);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = 'rgba(233,239,245,0.9)';
+          ctx.font = '12px Inter, sans-serif';
+          ctx.textAlign = 'left';
+          const ret = ((candle.close / candle.open) - 1) * 100;
+          ctx.fillText(`Open   ${candle.open.toFixed(2)}`, boxX + 12, boxY + 22);
+          ctx.fillText(`High   ${candle.high.toFixed(2)}`, boxX + 12, boxY + 40);
+          ctx.fillText(`Low    ${candle.low.toFixed(2)}`, boxX + 12, boxY + 58);
+          ctx.fillText(`Close  ${candle.close.toFixed(2)}`, boxX + 12, boxY + 76);
+          ctx.fillStyle = ret >= 0 ? 'rgba(16,185,129,0.95)' : 'rgba(239,68,68,0.95)';
+          ctx.fillText(`${ret >= 0 ? '+' : ''}${ret.toFixed(2)}%`, boxX + 102, boxY + 22);
+        }
+      }
+    }
+
+    class QuantumScene extends BaseScene {
+      initScene() {
+        this.qubits = [];
+        this.particles = [];
+        this.clickBursts = [];
+        const area = this.w * this.h;
+        const qubitCount = Math.max(10, Math.min(22, Math.floor(area / 42000)));
+        const particleCount = Math.max(60, Math.min(140, Math.floor(area / 11000)));
+        const margin = 60;
+
+        for (let i = 0; i < qubitCount; i++) {
+          this.qubits.push({
+            x: margin + Math.random() * Math.max(40, this.w - margin * 2),
+            y: margin + Math.random() * Math.max(40, this.h - margin * 2),
+            r: 20 + Math.random() * 34,
+            speed: 0.35 + Math.random() * 0.9,
+            phase: Math.random() * Math.PI * 2,
+            tilt: Math.random() * Math.PI,
+            hue: Math.random(),
+            pulse: 0.7 + Math.random() * 0.9,
+            orbiters: 1 + Math.floor(Math.random() * 3),
+            excited: 0,
+          });
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+          this.particles.push({
+            x: Math.random() * this.w,
+            y: Math.random() * this.h,
+            s: 0.6 + Math.random() * 2.4,
+            vy: 0.12 + Math.random() * 0.38,
+            vx: -0.15 + Math.random() * 0.3,
+            a: 0.08 + Math.random() * 0.18,
+            p: Math.random() * Math.PI * 2,
+          });
+        }
+
+        this.pointer.clickHandlers = [];
+        this.pointer.onClick((x, y) => this.handleClick(x * this.w, y * this.h));
+      }
+
+      handleClick(px, py) {
+        this.clickBursts.push({ x: px, y: py, life: 1 });
+        for (const q of this.qubits) {
+          const d = Math.hypot(q.x - px, q.y - py);
+          if (d < 180) q.excited = Math.max(q.excited, 1 - d / 180);
+        }
+      }
+
+      render(t) {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.w, this.h);
+
+        this.drawGrid(t);
+        this.drawWaveField(t);
+        this.drawEntanglement(t);
+
+        this.clickBursts = this.clickBursts.filter((b) => {
+          b.life -= 0.02;
+          return b.life > 0;
+        });
+
+        for (const p of this.particles) {
+          p.x += p.vx + Math.sin(t * 0.4 + p.p) * 0.08;
+          p.y -= p.vy;
+          if (p.y < -20) p.y = this.h + 20;
+          if (p.x < -30) p.x = this.w + 30;
+          if (p.x > this.w + 30) p.x = -30;
+          const flicker = 0.75 + 0.25 * Math.sin(t * 1.7 + p.p);
+          ctx.fillStyle = `rgba(196, 174, 255, ${p.a * flicker})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const mx = this.pointer.active ? this.pointer.x * this.w : this.w * 0.5;
+        const my = this.pointer.active ? this.pointer.y * this.h : this.h * 0.5;
+
+        for (const q of this.qubits) {
+          q.excited *= 0.965;
+          const driftX = Math.sin(t * 0.12 + q.phase) * 10;
+          const driftY = Math.cos(t * 0.14 + q.phase * 1.2) * 8;
+          const x = q.x + driftX;
+          const y = q.y + driftY;
+          const d = Math.hypot(x - mx, y - my);
+          const hoverBoost = this.pointer.active ? Math.max(0, 1 - d / 240) : 0;
+          const pulse = 1 + 0.08 * Math.sin(t * q.pulse + q.phase * 2) + hoverBoost * 0.18 + q.excited * 0.25;
+          const r = q.r * pulse;
+          const rot = t * q.speed + q.phase + hoverBoost * 1.6 + q.excited * 1.8;
+
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(q.tilt + Math.sin(t * 0.15 + q.phase) * 0.15);
+
+          const halo = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r * 3.1);
+          halo.addColorStop(0, `rgba(139, 92, 246, ${0.1 + q.hue * 0.02 + hoverBoost * 0.08 + q.excited * 0.14})`);
+          halo.addColorStop(1, 'rgba(139, 92, 246, 0)');
+          ctx.fillStyle = halo;
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 3.1, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = `rgba(180, 150, 255, ${0.2 + q.hue * 0.06 + hoverBoost * 0.2 + q.excited * 0.16})`;
+          ctx.lineWidth = 1.2 + hoverBoost * 0.8 + q.excited * 0.8;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r, r, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = `rgba(139, 92, 246, ${0.18 + hoverBoost * 0.16 + q.excited * 0.22})`;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r, r * 0.34, rot, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.strokeStyle = `rgba(210, 190, 255, ${0.14 + hoverBoost * 0.16 + q.excited * 0.14})`;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r * 0.36, r, rot, 0, Math.PI * 2);
+          ctx.stroke();
+
+          const vx = Math.cos(rot) * r * 0.95;
+          const vy = Math.sin(rot) * r * 0.95;
+          ctx.strokeStyle = `rgba(255,255,255, ${0.2 + hoverBoost * 0.22 + q.excited * 0.18})`;
+          ctx.beginPath();
+          ctx.moveTo(-vx * 0.55, -vy * 0.55);
+          ctx.lineTo(vx, vy);
+          ctx.stroke();
+
+          const g = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 0.35);
+          g.addColorStop(0, 'rgba(255,255,255,0.96)');
+          g.addColorStop(0.35, 'rgba(170, 132, 255, 0.92)');
+          g.addColorStop(1, 'rgba(170, 132, 255, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0, 0, r * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let i = 0; i < q.orbiters; i++) {
+            const a = rot * (1.15 + i * 0.28) + i * Math.PI;
+            const ex = Math.cos(a) * r;
+            const ey = Math.sin(a) * r * (0.35 + i * 0.22);
+            ctx.fillStyle = i % 2 === 0 ? 'rgba(170, 132, 255, 0.96)' : 'rgba(220, 205, 255, 0.96)';
+            ctx.beginPath();
+            ctx.arc(ex, ey, r * 0.07, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.restore();
+        }
+
+        for (const burst of this.clickBursts) {
+          ctx.strokeStyle = `rgba(139, 92, 246, ${burst.life * 0.4})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(burst.x, burst.y, (1 - burst.life) * 160 + 20, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        if (this.pointer.active) {
+          const grad = ctx.createRadialGradient(mx, my, 10, mx, my, 220);
+          grad.addColorStop(0, 'rgba(139, 92, 246, 0.18)');
+          grad.addColorStop(1, 'rgba(139, 92, 246, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(mx, my, 220, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      drawGrid(t) {
+        const ctx = this.ctx;
+        const spacing = 58;
+        const offsetX = (t * 8) % spacing;
+        const offsetY = (t * 5) % spacing;
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(139, 92, 246, 0.045)';
+        for (let x = -spacing; x <= this.w + spacing; x += spacing) {
+          ctx.beginPath();
+          ctx.moveTo(x + offsetX, 0);
+          ctx.lineTo(x + offsetX, this.h);
+          ctx.stroke();
+        }
+        for (let y = -spacing; y <= this.h + spacing; y += spacing) {
+          ctx.beginPath();
+          ctx.moveTo(0, y + offsetY);
+          ctx.lineTo(this.w, y + offsetY);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      drawWaveField(t) {
+        const ctx = this.ctx;
+        const lines = 5;
+        for (let i = 0; i < lines; i++) {
+          const baseY = this.h * (0.14 + i * 0.16);
+          ctx.beginPath();
+          for (let x = 0; x <= this.w; x += 8) {
+            const y = baseY + Math.sin(x * 0.012 + t * 1.4 + i) * 12 + Math.cos(x * 0.005 + t * 0.9 + i * 1.7) * 9;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = `rgba(139, 92, 246, ${0.035 + i * 0.013})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      drawEntanglement(t) {
+        const ctx = this.ctx;
+        const maxDist = Math.min(320, Math.max(220, this.w * 0.24));
+        const mx = this.pointer.active ? this.pointer.x * this.w : this.w * 0.5;
+        const my = this.pointer.active ? this.pointer.y * this.h : this.h * 0.5;
+
+        for (let i = 0; i < this.qubits.length; i++) {
+          for (let j = i + 1; j < this.qubits.length; j++) {
+            const a = this.qubits[i];
+            const b = this.qubits[j];
+            const ax = a.x + Math.sin(t * 0.12 + a.phase) * 10;
+            const ay = a.y + Math.cos(t * 0.14 + a.phase * 1.2) * 8;
+            const bx = b.x + Math.sin(t * 0.12 + b.phase) * 10;
+            const by = b.y + Math.cos(t * 0.14 + b.phase * 1.2) * 8;
+            const dist = Math.hypot(bx - ax, by - ay);
+            if (dist < maxDist) {
+              const alpha = (1 - dist / maxDist) * 0.16;
+              const centerX = (ax + bx) * 0.5;
+              const centerY = (ay + by) * 0.5;
+              const mouseFactor = this.pointer.active ? 1 - Math.min(1, Math.hypot(centerX - mx, centerY - my) / 340) : 0;
+              const exciteFactor = Math.max(a.excited, b.excited);
+              const bendX = (my - centerY) * 0.05 * mouseFactor;
+              const bendY = (mx - centerX) * 0.05 * mouseFactor;
+              ctx.save();
+              ctx.lineWidth = 1 + mouseFactor * 1.1 + exciteFactor * 1.1;
+              ctx.strokeStyle = `rgba(170, 132, 255, ${alpha + mouseFactor * 0.14 + exciteFactor * 0.18})`;
+              ctx.setLineDash([2, 8]);
+              ctx.lineDashOffset = -t * 25 * (0.35 + mouseFactor + exciteFactor * 0.6);
+              ctx.beginPath();
+              ctx.moveTo(ax, ay);
+              ctx.quadraticCurveTo(centerX + bendX, centerY - bendY, bx, by);
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+      }
+    }
+
+    const panels = {
+      ai: document.getElementById('scene-ai'),
+      quant: document.getElementById('scene-quant'),
+      qc: document.getElementById('scene-qc'),
+    };
+
+    const tabs = [...document.querySelectorAll('.tab')];
+    let activeKey = 'ai';
+
+    function setActiveMode(key) {
+      activeKey = key;
+      tabs.forEach((tab) => {
+        const isActive = tab.dataset.target === key;
+        tab.classList.toggle('active', isActive);
+
+        const color = tab.dataset.target === 'ai'
+          ? '#3B82F6'
+          : tab.dataset.target === 'quant'
+          ? '#10B981'
+          : '#8B5CF6';
+
+        tab.style.color = isActive ? color : 'rgba(230, 236, 248, 0.62)';
+        tab.style.setProperty('--accent', color);
+      });
+
+      Object.entries(panels).forEach(([panelKey, panel]) => {
+        panel.classList.toggle('active', panelKey === key);
+      });
+
+      resizeAll();
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => setActiveMode(tab.dataset.target));
+    });
+
+    const aiScene = new AIScene(
+      document.getElementById('canvas-ai'),
+      document.getElementById('scene-ai')
+    );
+    const quantScene = new QuantScene(
+      document.getElementById('canvas-quant'),
+      document.getElementById('scene-quant')
+    );
+    const qcScene = new QuantumScene(
+      document.getElementById('canvas-qc'),
+      document.getElementById('scene-qc')
+    );
+
+    function resizeAll() {
+      aiScene.resize();
+      quantScene.resize();
+      qcScene.resize();
+    }
+
+    window.addEventListener('resize', resizeAll);
+
+    window.addEventListener('keydown', (e) => {
+      const order = ['ai', 'quant', 'qc'];
+      let idx = order.indexOf(activeKey);
+
+      if (e.key === 'ArrowRight') {
+        idx = (idx + 1) % order.length;
+        setActiveMode(order[idx]);
+      } else if (e.key === 'ArrowLeft') {
+        idx = (idx - 1 + order.length) % order.length;
+        setActiveMode(order[idx]);
+      }
+    });
+
+    setActiveMode('ai');
+
+    function animate(ts) {
+      const t = ts * 0.001;
+      aiScene.render(t);
+      quantScene.render(t);
+      qcScene.render(t);
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
+
