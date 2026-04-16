@@ -349,69 +349,109 @@
 
   class QuantScene extends BaseScene {
     initScene() {
-      this.candles = [];
       this.gridLines = 5;
+      this.bufferCandles = 2;
+      this.candleSeconds = 1.8;
+      this.scrollProgress = 0;
+      this.lastStreamTime = null;
+      this.baseDrift = 0.00035;
+      this.lowVol = 0.0065;
+      this.highVol = 0.015;
+      this.shockVol = 0.028;
+      this.price = 100;
+      this.volRegime = this.lowVol;
       this.rebuildSeries();
     }
 
+    randomNormal() {
+      let u = 0;
+      let v = 0;
+
+      while (u === 0) {
+        u = Math.random();
+      }
+      while (v === 0) {
+        v = Math.random();
+      }
+
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    createNextCandle() {
+      const regimeRoll = Math.random();
+      if (regimeRoll < 0.08) {
+        this.volRegime = this.highVol;
+      } else if (regimeRoll < 0.11) {
+        this.volRegime = this.shockVol;
+      } else {
+        this.volRegime = 0.84 * this.volRegime + 0.16 * this.lowVol;
+      }
+
+      const overnightGap = this.randomNormal() * this.volRegime * 0.35;
+      const open = this.price * (1 + overnightGap);
+      const intradayReturn =
+        this.baseDrift + this.randomNormal() * this.volRegime;
+      const close = open * (1 + intradayReturn);
+      const bodyMove = Math.abs(close - open) / Math.max(open, 1e-9);
+      const upperWickFraction =
+        Math.abs(this.randomNormal()) *
+          this.volRegime *
+          (0.45 + Math.random() * 0.55) +
+        bodyMove * 0.35;
+      const lowerWickFraction =
+        Math.abs(this.randomNormal()) *
+          this.volRegime *
+          (0.45 + Math.random() * 0.55) +
+        bodyMove * 0.35;
+      const high = Math.max(open, close) * (1 + upperWickFraction);
+      const low =
+        Math.min(open, close) * Math.max(0.001, 1 - lowerWickFraction);
+
+      this.price = close;
+      return { open, high, low, close };
+    }
+
     rebuildSeries() {
+      this.visibleCount = Math.max(34, Math.min(72, Math.floor(this.w / 24)));
       this.candles = [];
-      const count = Math.max(34, Math.min(72, Math.floor(this.w / 24)));
+      this.scrollProgress = 0;
+      this.lastStreamTime = null;
+      this.price = 100;
+      this.volRegime = this.lowVol;
 
-      const baseDrift = 0.00035;
-      const lowVol = 0.0065;
-      const highVol = 0.015;
-      const shockVol = 0.028;
-
-      let price = 100;
-      let volRegime = lowVol;
-
-      const randn = () => {
-        let u = 0;
-        let v = 0;
-        while (u === 0) {
-          u = Math.random();
-        }
-        while (v === 0) {
-          v = Math.random();
-        }
-        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
-      };
-
+      const count = this.visibleCount + this.bufferCandles;
       for (let index = 0; index < count; index += 1) {
-        const regimeRoll = Math.random();
-        if (regimeRoll < 0.08) {
-          volRegime = highVol;
-        } else if (regimeRoll < 0.11) {
-          volRegime = shockVol;
-        } else {
-          volRegime = 0.84 * volRegime + 0.16 * lowVol;
-        }
-
-        const overnightGap = randn() * volRegime * 0.35;
-        const open = price * (1 + overnightGap);
-        const intradayReturn = baseDrift + randn() * volRegime;
-        const close = open * (1 + intradayReturn);
-        const bodyMove = Math.abs(close - open) / Math.max(open, 1e-9);
-        const upperWickFraction =
-          Math.abs(randn()) * volRegime * (0.45 + Math.random() * 0.55) +
-          bodyMove * 0.35;
-        const lowerWickFraction =
-          Math.abs(randn()) * volRegime * (0.45 + Math.random() * 0.55) +
-          bodyMove * 0.35;
-        const high = Math.max(open, close) * (1 + upperWickFraction);
-        const low =
-          Math.min(open, close) * Math.max(0.001, 1 - lowerWickFraction);
-
-        this.candles.push({ open, high, low, close });
-        price = close;
+        this.candles.push(this.createNextCandle());
       }
     }
 
-    render() {
+    updateStream(t) {
+      if (typeof t !== "number") {
+        return;
+      }
+
+      if (this.lastStreamTime == null) {
+        this.lastStreamTime = t;
+        return;
+      }
+
+      const elapsed = Math.max(0, Math.min(0.12, t - this.lastStreamTime));
+      this.lastStreamTime = t;
+      this.scrollProgress += elapsed / this.candleSeconds;
+
+      while (this.scrollProgress >= 1) {
+        this.scrollProgress -= 1;
+        this.candles.shift();
+        this.candles.push(this.createNextCandle());
+      }
+    }
+
+    render(t) {
       if (!this.initialized) {
         return;
       }
+
+      this.updateStream(t);
 
       const ctx = this.ctx;
       ctx.clearRect(0, 0, this.w, this.h);
@@ -428,7 +468,20 @@
       const chartW = Math.max(120, this.w - padLeft - padRight);
       const chartH = Math.max(120, this.h - padTop - padBottom);
 
-      const prices = this.candles.flatMap((candle) => [
+      const candleStep = chartW / this.visibleCount;
+      const visibleCandles = [];
+      for (let index = 0; index < this.candles.length; index += 1) {
+        const slotLeft = chartX + (index - this.scrollProgress) * candleStep;
+        const slotRight = slotLeft + candleStep;
+
+        if (slotRight < chartX || slotLeft > chartX + chartW) {
+          continue;
+        }
+
+        visibleCandles.push(this.candles[index]);
+      }
+
+      const prices = visibleCandles.flatMap((candle) => [
         candle.open,
         candle.high,
         candle.low,
@@ -465,7 +518,6 @@
         ctx.fillText(labelPrice.toFixed(1), chartX - 10, y + 4);
       }
 
-      const candleStep = chartW / this.candles.length;
       const candleWidth = Math.max(6, Math.min(14, candleStep * 0.58));
       let hovered = -1;
       const mx = this.pointer.active ? this.pointer.x * this.w : -1;
@@ -478,18 +530,35 @@
         my >= chartY &&
         my <= chartY + chartH
       ) {
-        hovered = Math.max(
-          0,
-          Math.min(
-            this.candles.length - 1,
-            Math.floor((mx - chartX) / candleStep)
-          )
-        );
+        for (let index = 0; index < this.candles.length; index += 1) {
+          const slotLeft = chartX + (index - this.scrollProgress) * candleStep;
+          const slotRight = slotLeft + candleStep;
+          if (mx >= slotLeft && mx < slotRight) {
+            hovered = index;
+            break;
+          }
+        }
       }
+
+      let frontier = null;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(chartX, chartY, chartW, chartH);
+      ctx.clip();
 
       for (let index = 0; index < this.candles.length; index += 1) {
         const candle = this.candles[index];
-        const x = chartX + index * candleStep + candleStep * 0.5;
+        const slotLeft = chartX + (index - this.scrollProgress) * candleStep;
+        const slotRight = slotLeft + candleStep;
+
+        if (
+          slotRight < chartX - candleWidth ||
+          slotLeft > chartX + chartW + candleWidth
+        ) {
+          continue;
+        }
+
+        const x = slotLeft + candleStep * 0.5;
         const yOpen = priceToY(candle.open);
         const yClose = priceToY(candle.close);
         const yHigh = priceToY(candle.high);
@@ -540,24 +609,30 @@
             bodyHeight + 6
           );
         }
+
+        if (slotLeft < chartX + chartW && slotRight > chartX) {
+          frontier = { candle, x };
+        }
       }
 
-      const last = this.candles[this.candles.length - 1];
-      const lastY = priceToY(last.close);
-      const lastBull = last.close >= last.open;
-      ctx.strokeStyle = lastBull
-        ? "rgba(16,185,129,0.32)"
-        : "rgba(239,68,68,0.32)";
-      ctx.setLineDash([6, 6]);
-      ctx.beginPath();
-      ctx.moveTo(chartX, lastY);
-      ctx.lineTo(chartX + chartW, lastY);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      if (frontier) {
+        const lastY = priceToY(frontier.candle.close);
+        const lastBull = frontier.candle.close >= frontier.candle.open;
+        ctx.strokeStyle = lastBull
+          ? "rgba(16,185,129,0.32)"
+          : "rgba(239,68,68,0.32)";
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(chartX, lastY);
+        ctx.lineTo(chartX + chartW, lastY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
 
       if (hovered >= 0) {
         const candle = this.candles[hovered];
-        const x = chartX + hovered * candleStep + candleStep * 0.5;
+        const x =
+          chartX + (hovered - this.scrollProgress) * candleStep + candleStep * 0.5;
         const yMid = priceToY((candle.high + candle.low) * 0.5);
 
         ctx.strokeStyle = "rgba(255,255,255,0.24)";
@@ -567,7 +642,15 @@
         ctx.lineTo(x, chartY + chartH);
         ctx.stroke();
         ctx.setLineDash([]);
+      }
 
+      ctx.restore();
+
+      if (hovered >= 0) {
+        const candle = this.candles[hovered];
+        const x =
+          chartX + (hovered - this.scrollProgress) * candleStep + candleStep * 0.5;
+        const yMid = priceToY((candle.high + candle.low) * 0.5);
         const boxW = 166;
         const boxH = 88;
         let boxX = x + 18;
