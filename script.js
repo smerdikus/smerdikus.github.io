@@ -20,6 +20,10 @@ const state = {
 
 const focusOrder = ["ml", "quant", "quantum"];
 
+function resetScrollPosition() {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+}
+
 function closeMenu() {
   if (!navMenu || !navToggle) {
     return;
@@ -123,6 +127,7 @@ function navigate(view, focus = state.focus) {
   }
 
   applyState({ view, focus });
+  resetScrollPosition();
 }
 
 if (navToggle && navMenu) {
@@ -202,6 +207,7 @@ window.addEventListener("keydown", (event) => {
 
 window.addEventListener("popstate", () => {
   applyState(parseHash());
+  resetScrollPosition();
 });
 
 if (!window.location.hash) {
@@ -209,3 +215,4 @@ if (!window.location.hash) {
 }
 
 applyState(parseHash());
+resetScrollPosition();
